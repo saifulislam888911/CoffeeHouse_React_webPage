@@ -11,7 +11,7 @@ Version :
 - Style : Tailwind CSS 3
 
 
-# Project : CoffeeHouse-WebPage
+# Project : CoffeeHouse-webPage
 Helped From : AI IDE, Self-Practice, Self-Study.
 
 
