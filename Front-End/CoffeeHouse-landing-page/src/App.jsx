@@ -29,26 +29,21 @@ function App() {
   }, [theme]) // Re-run when theme changes
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Header with navigation, theme toggle, and favorites counter */}
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-amber-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100">
+      <a
+        href="#menu"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:left-4 focus:top-4 focus:px-4 focus:py-2 focus:rounded-full focus:bg-amber-500 focus:text-white focus:shadow-lg"
+      >
+        Skip to menu
+      </a>
       <Header />
-      
-      {/* Hero section - the main banner at the top */}
-      <Hero />
-      
-      {/* Menu section - displays coffee items */}
-      <MenuSection />
-      
-      {/* About Us section */}
-      <About />
-      
-      {/* Testimonials section */}
-      <Testimonials />
-      
-      {/* Contact section with map and hours */}
-      <Contact />
-      
-      {/* Footer */}
+      <main id="main-content">
+        <Hero />
+        <MenuSection />
+        <About />
+        <Testimonials />
+        <Contact />
+      </main>
       <Footer />
     </div>
   )
