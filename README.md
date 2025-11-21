@@ -14,8 +14,10 @@ Version :
 Helped From : AI IDE, Self-Practice, Self-Study.
 
 
-# Branch : ("Development-2")
+# Branch : ("main")
+Main : Version Update (For releasing new updated version).
 Development (DevWithNotes-02, DevWithNotes-03, DevWithNotes-04) : For Updating new features. Always Upto Date. Clean Codes (Delete Comments & Notes).0
+DevWithNotes : For Pushing working codes alongside with Comments & Notes. Always Upto Date.
 
 
 # Company : Bangladesh Thalassemia Foundation :
