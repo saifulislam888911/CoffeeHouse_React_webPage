@@ -1,47 +1,38 @@
-// Redux Slice for Favorites Management
-// This manages which menu items the user has added to favorites
-
 import { createSlice } from '@reduxjs/toolkit'
 
-// Get saved favorites from localStorage, or default to empty array
 const getInitialFavorites = () => {
-  const savedFavorites = localStorage.getItem('favorites')
-  return savedFavorites ? JSON.parse(savedFavorites) : []
+  if (typeof window === 'undefined') return []
+  try {
+    const stored = window.localStorage.getItem('favorites')
+    return stored ? JSON.parse(stored) : []
+  } catch (error) {
+    console.warn('Unable to read favorites from storage', error)
+    return []
+  }
 }
 
-// Create the favorites slice
+const persistFavorites = (items) => {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem('favorites', JSON.stringify(items))
+}
+
 const favoritesSlice = createSlice({
-  name: 'favorites', // Name of the slice
+  name: 'favorites',
   initialState: {
-    items: getInitialFavorites(), // Array of favorite item IDs
+    items: getInitialFavorites(),
   },
   reducers: {
-    // Action to add an item to favorites
     addFavorite: (state, action) => {
-      // action.payload contains the item ID we want to add
-      const itemId = action.payload
-      // Only add if it's not already in favorites
-      if (!state.items.includes(itemId)) {
-        state.items.push(itemId)
-        // Save to localStorage
-        localStorage.setItem('favorites', JSON.stringify(state.items))
-      }
+      if (state.items.includes(action.payload)) return
+      state.items.push(action.payload)
+      persistFavorites(state.items)
     },
-    // Action to remove an item from favorites
     removeFavorite: (state, action) => {
-      // action.payload contains the item ID we want to remove
-      const itemId = action.payload
-      // Filter out the item with this ID
-      state.items = state.items.filter(id => id !== itemId)
-      // Save to localStorage
-      localStorage.setItem('favorites', JSON.stringify(state.items))
+      state.items = state.items.filter((id) => id !== action.payload)
+      persistFavorites(state.items)
     },
   },
 })
 
-// Export the actions so we can use them in components
 export const { addFavorite, removeFavorite } = favoritesSlice.actions
-
-// Export the reducer so we can add it to the store
 export default favoritesSlice.reducer
-

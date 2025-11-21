@@ -1,148 +1,265 @@
-// Header Component
-// Contains navigation, theme toggle button, and favorites counter
+import { useEffect, useRef, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { toggleTheme } from "../redux/themeSlice";
+import navLinks from "../constants/navLinks";
 
-import { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { toggleTheme } from '../redux/themeSlice'
+const SCROLL_THRESHOLD = 32;
+
+const MenuIcon = ({ open }) => (
+  <span className="relative flex h-6 w-6 items-center justify-center" aria-hidden="true">
+    <span
+      className={`absolute h-0.5 w-6 origin-center rounded-full bg-current transition-all duration-300 ${
+        open ? 'translate-y-0 rotate-45' : '-translate-y-2'
+      }`}
+    />
+    <span
+      className={`absolute h-0.5 w-6 rounded-full bg-current transition-opacity duration-300 ${
+        open ? 'opacity-0' : 'opacity-100'
+      }`}
+    />
+    <span
+      className={`absolute h-0.5 w-6 origin-center rounded-full bg-current transition-all duration-300 ${
+        open ? 'translate-y-0 -rotate-45' : 'translate-y-2'
+      }`}
+    />
+  </span>
+);
+
+// Heart icon component (outline -> filled). Adds subtle pulse + pop when there are favorites.
+const HeartIcon = ({ filled }) => (
+  <span
+    className={`relative inline-flex items-center justify-center w-8 h-8 rounded-full transition-transform transform ${
+      filled ? "scale-100 motion-safe:animate-pulse" : "hover:scale-105"
+    }`}
+    aria-hidden="true"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      className={`w-5 h-5 transition-colors duration-300 ${
+        filled ? "text-rose-500" : "text-slate-400 dark:text-slate-500"
+      }`}
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
+      <path
+        d="M12.1 21s-6.3-4.9-8.4-9.0C1.7 8.4 2.8 5 6 5c1.7 0 3.1.9 4.1 2.3C11.9 5.9 13.3 5 15 5c3.2 0 4.3 3.4 2.3 7.0C18.4 16.1 12.1 21 12.1 21z"
+        className={filled ? "" : "fill-transparent"}
+      />
+    </svg>
+    {/* subtle ping ring when filled */}
+    {filled && (
+      <span className="absolute -inset-1 rounded-full opacity-40 motion-safe:animate-ping" />
+    )}
+  </span>
+);
+
+// Redesigned logo badge (compact SVG — replace or tweak as needed)
+const LogoBadge = () => (
+  <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white shadow-lg shadow-amber-200/40">
+    <svg viewBox="0 0 32 32" className="h-7 w-7" aria-hidden="true" fill="none">
+      <g
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="text-white"
+      >
+        {/* Coffee cup base */}
+        <path d="M8 18c0 4 4 6 8 6s8-2 8-6V12H8v6z" />
+        {/* Steam lines */}
+        <path d="M11 9c0-1.5 1.3-2.5 1-4" className="opacity-90" />
+        <path d="M15 9c0-1.5 1.3-2.5 1-4" className="opacity-75" />
+      </g>
+    </svg>
+  </span>
+);
 
 function Header() {
-  // useState is a React hook for managing component state
-  // mobileMenuOpen tracks whether the mobile menu is visible
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
+  const [scrolled, setScrolled] = useState(false);
+  const activeSectionRef = useRef("home");
 
-  // Get data from Redux store
-  const favoritesCount = useSelector((state) => state.favorites.items.length)
-  const theme = useSelector((state) => state.theme.mode)
+  const favoritesCount = useSelector((state) => state.favorites.items.length);
+  const theme = useSelector((state) => state.theme.mode);
+  const dispatch = useDispatch();
 
-  // useDispatch gives us a function to dispatch actions (trigger Redux actions)
-  const dispatch = useDispatch()
+  const handleThemeToggle = () => dispatch(toggleTheme());
 
-  // Function to handle theme toggle
-  const handleThemeToggle = () => {
-    dispatch(toggleTheme())
-  }
-
-  // Function to scroll to a section smoothly
   const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId)
+    const element = typeof document !== "undefined" ? document.getElementById(sectionId) : null;
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
-      setMobileMenuOpen(false) // Close mobile menu after clicking
+      element.scrollIntoView({ behavior: "smooth" });
+      setMobileMenuOpen(false);
+      setActiveSection(sectionId);
     }
-  }
+  };
+
+  useEffect(() => {
+    activeSectionRef.current = activeSection;
+  }, [activeSection]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+    const handleScroll = () => {
+      setScrolled(window.scrollY > SCROLL_THRESHOLD);
+
+      const sections = navLinks
+        .map((link) => document.getElementById(link.id))
+        .filter(Boolean);
+
+      const current = sections.find((section) => {
+        const rect = section.getBoundingClientRect();
+        return rect.top <= 120 && rect.bottom >= 120;
+      });
+
+      if (current?.id && current.id !== activeSectionRef.current) {
+        setActiveSection(current.id);
+      }
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const renderNavButton = (link, isMobile = false) => {
+    const isActive = activeSection === link.id;
+    const baseClasses = isMobile
+      ? "block w-full text-left px-4 py-3 rounded-xl"
+      : "relative px-4 py-2";
+
+    return (
+      <button
+        type="button"
+        key={link.id}
+        onClick={() => scrollToSection(link.id)}
+        aria-current={isActive ? "page" : undefined}
+        className={`${baseClasses} group font-semibold text-sm uppercase tracking-[0.15em] transition-all duration-250 transform will-change-transform ${
+          isMobile
+            ? "text-slate-400 dark:text-slate-200 hover:bg-amber-50/70 dark:hover:bg-gray-800"
+            : "text-slate-400 dark:text-slate-200"
+        } ${
+          isActive
+            ? "text-amber-600 dark:text-amber-200"
+            : "hover:text-amber-400"
+        } focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300`}
+      >
+        <span className="relative inline-block">
+          {/* Label text with hover/active visual */}
+          <span
+            className={`inline-block transform transition-transform duration-200 ${
+              isActive
+                ? "scale-105 -translate-y-0.5"
+                : "group-hover:-translate-y-0.5"
+            }`}
+          >
+            {link.label}
+          </span>
+
+          {/* Animated underline */}
+          <span
+            className={`absolute left-0 -bottom-1 h-0.5 bg-amber-500 dark:bg-amber-300 transition-all duration-300 ${
+              isActive
+                ? "w-full opacity-100"
+                : "w-0 opacity-0 group-hover:w-full group-hover:opacity-80"
+            }`}
+            aria-hidden="true"
+          />
+        </span>
+      </button>
+    );
+  };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 shadow-md">
-      <nav className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo/Brand Name */}
-          <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-            ☕ Coffee House
-          </div>
-
-          {/* Desktop Navigation - hidden on mobile, visible on md screens and up */}
-          <div className="hidden md:flex items-center space-x-6">
-            <button
-              onClick={() => scrollToSection('home')}
-              className="text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-            >
-              Home
-            </button>
-            <button
-              onClick={() => scrollToSection('menu')}
-              className="text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-            >
-              Menu
-            </button>
-            <button
-              onClick={() => scrollToSection('about')}
-              className="text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-            >
-              About
-            </button>
-            <button
-              onClick={() => scrollToSection('testimonials')}
-              className="text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-            >
-              Testimonials
-            </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-            >
-              Contact
-            </button>
-          </div>
-
-          {/* Right side: Favorites counter and Theme toggle */}
-          <div className="flex items-center space-x-4">
-            {/* Favorites Counter */}
-            <div className="flex items-center space-x-2">
-              <span className="text-xl">❤️</span>
-              <span className="text-gray-700 dark:text-gray-200 font-semibold">
-                {favoritesCount}
-              </span>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/80 text-slate-900 shadow-sm backdrop-blur-md transition-[background,backdrop-filter,box-shadow,border-color] duration-500 ease-out dark:border-white/5 dark:bg-gray-950/70 dark:text-white md:border-transparent md:bg-transparent md:text-inherit md:shadow-none md:backdrop-blur-0 dark:md:border-transparent dark:md:bg-transparent dark:md:text-inherit dark:md:shadow-none dark:md:backdrop-blur-0 ${
+        scrolled
+          ? "md:border-white/10 md:bg-white/70 md:shadow-md md:backdrop-blur-md dark:md:border-white/10 dark:md:bg-gray-900/60 dark:md:backdrop-blur-md"
+          : ""
+      }`}
+    >
+      <nav className="container mx-auto px-4 py-4 flex flex-col gap-4 md:grid md:grid-cols-[auto,1fr,auto] md:items-center md:gap-6">
+        <div className="flex items-center justify-between rounded-3xl px-1 py-2 sm:justify-start">
+          <button
+            type="button"
+            onClick={() => scrollToSection("home")}
+            className="flex items-center gap-4 rounded-3xl px-3 py-2"
+            aria-label="Coffee House logo"
+          >
+            <LogoBadge />
+            <div className="text-left">
+              <p className="text-xl font-extrabold tracking-wide text-amber-600 dark:text-amber-100 drop-shadow-sm">
+                Coffee House
+              </p>
+              <p className="text-xs uppercase tracking-[0.4em] text-amber-600/80 dark:text-amber-200">
+                Brewing Moments
+              </p>
             </div>
-
-            {/* Theme Toggle Button */}
-            <button
-              onClick={handleThemeToggle}
-              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? '🌙' : '☀️'}
-            </button>
-
-            {/* Mobile Menu Button - visible on mobile, hidden on md screens and up */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? '✕' : '☰'}
-            </button>
-          </div>
+          </button>
         </div>
 
-        {/* Mobile Menu - shown when mobileMenuOpen is true */}
+        <div className="hidden md:flex flex-1 items-center justify-center gap-3 rounded-3xl px-6 py-2">
+          {navLinks.map((link) => renderNavButton(link))}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end md:justify-end md:gap-4">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 dark:bg-white/5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
+              <HeartIcon filled={favoritesCount > 0} />
+            </span>
+            <span className="text-sm font-semibold text-slate-400 dark:text-slate-100" aria-live="polite">
+              {favoritesCount}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleThemeToggle}
+            aria-pressed={theme === "dark"}
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            className="relative inline-flex h-10 w-20 items-center justify-between rounded-full border border-white/10 bg-white/10 px-2 text-sm shadow-sm backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+          >
+            <span className={`text-lg transition-colors ${theme === "light" ? "text-amber-400" : "text-slate-500"}`}>☀</span>
+            <span
+              aria-hidden="true"
+              className={`absolute inset-y-1 left-1 grid w-8 place-items-center rounded-full bg-amber-500 text-white text-base font-semibold transition-transform duration-300 ${
+                theme === "dark" ? "translate-x-8" : ""
+              }`}
+            >
+              {theme === "dark" ? "🌙" : "☀"}
+            </span>
+            <span className={`text-lg transition-colors ${theme === "dark" ? "text-amber-200" : "text-slate-500"}`}>🌙</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/40 bg-black/60 px-4 py-2 text-white shadow-lg backdrop-blur dark:border-white/40 dark:bg-white/10 dark:text-white sm:flex-initial sm:justify-start"
+            aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav"
+          >
+            <span className="sr-only">{mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}</span>
+            <MenuIcon open={mobileMenuOpen} />
+            <span className="text-xs font-semibold uppercase tracking-[0.4em]">Menu</span>
+          </button>
+        </div>
+
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 space-y-2">
-            <button
-              onClick={() => scrollToSection('home')}
-              className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-            >
-              Home
-            </button>
-            <button
-              onClick={() => scrollToSection('menu')}
-              className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-            >
-              Menu
-            </button>
-            <button
-              onClick={() => scrollToSection('about')}
-              className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-            >
-              About
-            </button>
-            <button
-              onClick={() => scrollToSection('testimonials')}
-              className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-            >
-              Testimonials
-            </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-            >
-              Contact
-            </button>
+          <div
+            id="mobile-nav"
+            className="w-full md:hidden bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-2xl py-4 space-y-2 border border-white/5"
+          >
+            {navLinks.map((link) => renderNavButton(link, true))}
           </div>
         )}
       </nav>
     </header>
-  )
+  );
 }
 
-export default Header
-
+export default Header;

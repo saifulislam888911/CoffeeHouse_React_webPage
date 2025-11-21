@@ -10,10 +10,47 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom styles for smooth transitions */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease;
+:root {
+  --brand-amber: #fbbf24;
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+body {
+  font-family: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #fffaf3;
+  color: #1f1a16;
+  line-height: 1.6;
+}
+
+html.dark body {
+  background-color: #090806;
+  color: #f5f3f0;
+}
+
+::selection {
+  background-color: rgba(251, 191, 36, 0.35);
+  color: #0b0907;
+}
+
+a,
+button,
+[role='button'],
+input,
+select,
+textarea {
+  transition:
+    color 0.25s var(--ease-soft),
+    background-color 0.25s var(--ease-soft),
+    border-color 0.25s var(--ease-soft),
+    transform 0.25s var(--ease-soft),
+    box-shadow 0.25s var(--ease-soft);
+}
+
+section {
+  scroll-margin-top: 120px;
+}
+
+/* Custom styles for smooth transitions */
 
 /* Fade-in animation for hero section */
 @keyframes fadeIn {
@@ -33,5 +70,20 @@ html {
 
 .animate-fade-in-delay {
   animation: fadeIn 1s ease-out 0.3s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
 }
 
