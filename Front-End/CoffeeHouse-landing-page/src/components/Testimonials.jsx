@@ -1,95 +1,98 @@
 import { useEffect, useMemo, useState } from "react";
 
-function Testimonials() {
-  // Testimonials data
-  const testimonials = [
-    {
-      id: 1,
-      name: "Tanmoy Ahmed",
-      text: "The latte here is incredible! The relaxing ambience and warm service win me over every visit.",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 2,
-      name: "Rakibul Hasan",
-      text: "My go-to hangout spot with friends. The cold brew has a depth of flavor that’s spot on every time.",
-      rating: 4.5,
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 3,
-      name: "Maisha Chowdhury",
-      text: "Fresh pastries paired with their specialty coffee make mornings feel special. Service is lightning fast too.",
-      rating: 4,
-      image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 4,
-      name: "Farhan Islam",
-      text: "Every cup tastes consistently great. The baristas are artisans and it shows in each pour.",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 5,
-      name: "Nusrat Rahman",
-      text: "Rustic interiors, mellow music, and an espresso that hits the sweet spot every single time.",
-      rating: 4.5,
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 6,
-      name: "Sadia Karim",
-      text: "The flat white is silky smooth and the latte art always makes me smile. Such a welcoming crew!",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 7,
-      name: "Adnan Chowdhury",
-      text: "Love their seasonal specials. Whether it’s pumpkin spice or peppermint mocha, they nail the flavors.",
-      rating: 4,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 8,
-      name: "Mouri Anjum",
-      text: "The staff remembers my order! That personal touch plus the cozy seating keeps me coming back.",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 9,
-      name: "Imran Sayeed",
-      text: "I host client meetings here because the vibe is calm yet energetic. Cappuccino is top tier.",
-      rating: 4,
-      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 10,
-      name: "Shaila Noor",
-      text: "Their signature caramel latte is the comfort drink I didn’t know I needed. Love the presentation!",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1544723795-432537f2b2f5?auto=format&fit=crop&w=600&q=80"
-    }
-  ]
+const TESTIMONIALS = [
+  {
+    id: 1,
+    name: "Tanmoy Ahmed",
+    text: "The latte here is incredible! The relaxing ambience and warm service win me over every visit.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 2,
+    name: "Rakibul Hasan",
+    text: "My go-to hangout spot with friends. The cold brew has a depth of flavor that’s spot on every time.",
+    rating: 4.5,
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 3,
+    name: "Maisha Chowdhury",
+    text: "Fresh pastries paired with their specialty coffee make mornings feel special. Service is lightning fast too.",
+    rating: 4,
+    image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 4,
+    name: "Farhan Islam",
+    text: "Every cup tastes consistently great. The baristas are artisans and it shows in each pour.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 5,
+    name: "Nusrat Rahman",
+    text: "Rustic interiors, mellow music, and an espresso that hits the sweet spot every single time.",
+    rating: 4.5,
+    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 6,
+    name: "Sadia Karim",
+    text: "The flat white is silky smooth and the latte art always makes me smile. Such a welcoming crew!",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 7,
+    name: "Adnan Chowdhury",
+    text: "Love their seasonal specials. Whether it’s pumpkin spice or peppermint mocha, they nail the flavors.",
+    rating: 4,
+    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 8,
+    name: "Mouri Anjum",
+    text: "The staff remembers my order! That personal touch plus the cozy seating keeps me coming back.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 9,
+    name: "Imran Sayeed",
+    text: "I host client meetings here because the vibe is calm yet energetic. Cappuccino is top tier.",
+    rating: 4,
+    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 10,
+    name: "Shaila Noor",
+    text: "Their signature caramel latte is the comfort drink I didn’t know I needed. Love the presentation!",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1544723795-432537f2b2f5?auto=format&fit=crop&w=600&q=80"
+  }
+];
 
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
-  const slides = useMemo(() => {
-    const chunkSize = 3
-    const result = []
-    for (let i = 0; i < testimonials.length; i += chunkSize) {
-      result.push(testimonials.slice(i, i + chunkSize))
-    }
-    return result
-  }, [testimonials])
+const chunkTestimonials = (items, chunkSize) => {
+  const result = [];
+  for (let i = 0; i < items.length; i += chunkSize) {
+    result.push(items.slice(i, i + chunkSize));
+  }
+  return result;
+};
+
+function Testimonials() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const slides = useMemo(
+    () => chunkTestimonials(TESTIMONIALS, 3),
+    []
+  );
 
   const stats = useMemo(() => {
-    const total = testimonials.length
-    const average =
-      testimonials.reduce((sum, t) => sum + t.rating, 0) / total
+    const total = TESTIMONIALS.length;
+    const average = TESTIMONIALS.reduce((sum, testimonial) => sum + testimonial.rating, 0) / total;
 
     return [
       {
@@ -107,8 +110,8 @@ function Testimonials() {
         value: "2010",
         helper: "brewing stories daily",
       },
-    ]
-  }, [testimonials])
+    ];
+  }, []);
 
   useEffect(() => {
     if (isPaused) return

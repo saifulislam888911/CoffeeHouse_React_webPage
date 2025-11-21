@@ -1,16 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/themeSlice";
-
-const navLinks = [
-  { id: "home", label: "Home" },
-  { id: "menu", label: "Menu" },
-  { id: "about", label: "About" },
-  { id: "testimonials", label: "Testimonials" },
-  { id: "contact", label: "Contact" },
-];
+import navLinks from "../constants/navLinks";
 
 const SCROLL_THRESHOLD = 32;
+
+const MenuIcon = ({ open }) => (
+  <span className="relative flex h-6 w-6 items-center justify-center" aria-hidden="true">
+    <span
+      className={`absolute h-0.5 w-6 origin-center rounded-full bg-current transition-all duration-300 ${
+        open ? 'translate-y-0 rotate-45' : '-translate-y-2'
+      }`}
+    />
+    <span
+      className={`absolute h-0.5 w-6 rounded-full bg-current transition-opacity duration-300 ${
+        open ? 'opacity-0' : 'opacity-100'
+      }`}
+    />
+    <span
+      className={`absolute h-0.5 w-6 origin-center rounded-full bg-current transition-all duration-300 ${
+        open ? 'translate-y-0 -rotate-45' : 'translate-y-2'
+      }`}
+    />
+  </span>
+);
 
 // Heart icon component (outline -> filled). Adds subtle pulse + pop when there are favorites.
 const HeartIcon = ({ filled }) => (
@@ -66,6 +79,7 @@ function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [scrolled, setScrolled] = useState(false);
+  const activeSectionRef = useRef("home");
 
   const favoritesCount = useSelector((state) => state.favorites.items.length);
   const theme = useSelector((state) => state.theme.mode);
@@ -74,7 +88,7 @@ function Header() {
   const handleThemeToggle = () => dispatch(toggleTheme());
 
   const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
+    const element = typeof document !== "undefined" ? document.getElementById(sectionId) : null;
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
       setMobileMenuOpen(false);
@@ -83,6 +97,13 @@ function Header() {
   };
 
   useEffect(() => {
+    activeSectionRef.current = activeSection;
+  }, [activeSection]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
     const handleScroll = () => {
       setScrolled(window.scrollY > SCROLL_THRESHOLD);
 
@@ -95,7 +116,7 @@ function Header() {
         return rect.top <= 120 && rect.bottom >= 120;
       });
 
-      if (current?.id && current.id !== activeSection) {
+      if (current?.id && current.id !== activeSectionRef.current) {
         setActiveSection(current.id);
       }
     };
@@ -103,7 +124,7 @@ function Header() {
     handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [activeSection]);
+  }, []);
 
   const renderNavButton = (link, isMobile = false) => {
     const isActive = activeSection === link.id;
@@ -113,6 +134,7 @@ function Header() {
 
     return (
       <button
+        type="button"
         key={link.id}
         onClick={() => scrollToSection(link.id)}
         aria-current={isActive ? "page" : undefined}
@@ -154,82 +176,84 @@ function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "backdrop-blur-md shadow-md" : ""
+      className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/80 text-slate-900 shadow-sm backdrop-blur-md transition-[background,backdrop-filter,box-shadow,border-color] duration-500 ease-out dark:border-white/5 dark:bg-gray-950/70 dark:text-white md:border-transparent md:bg-transparent md:text-inherit md:shadow-none md:backdrop-blur-0 dark:md:border-transparent dark:md:bg-transparent dark:md:text-inherit dark:md:shadow-none dark:md:backdrop-blur-0 ${
+        scrolled
+          ? "md:border-white/10 md:bg-white/70 md:shadow-md md:backdrop-blur-md dark:md:border-white/10 dark:md:bg-gray-900/60 dark:md:backdrop-blur-md"
+          : ""
       }`}
-      style={{ background: "transparent" }}
     >
-      <nav className="container mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
-        <button
-          onClick={() => scrollToSection("home")}
-          className="flex items-center gap-4 rounded-3xl px-3 py-2"
-          aria-label="Coffee House logo"
-        >
-          <LogoBadge />
-          <div className="text-left">
-            <p className="text-xl font-extrabold tracking-wide text-amber-600 dark:text-amber-100 drop-shadow-sm">
-              Coffee House
-            </p>
-            <p className="text-xs uppercase tracking-[0.4em] text-amber-600/80 dark:text-amber-200">
-              Brewing Moments
-            </p>
-          </div>
-        </button>
+      <nav className="container mx-auto px-4 py-4 flex flex-col gap-4 md:grid md:grid-cols-[auto,1fr,auto] md:items-center md:gap-6">
+        <div className="flex items-center justify-between rounded-3xl px-1 py-2 sm:justify-start">
+          <button
+            type="button"
+            onClick={() => scrollToSection("home")}
+            className="flex items-center gap-4 rounded-3xl px-3 py-2"
+            aria-label="Coffee House logo"
+          >
+            <LogoBadge />
+            <div className="text-left">
+              <p className="text-xl font-extrabold tracking-wide text-amber-600 dark:text-amber-100 drop-shadow-sm">
+                Coffee House
+              </p>
+              <p className="text-xs uppercase tracking-[0.4em] text-amber-600/80 dark:text-amber-200">
+                Brewing Moments
+              </p>
+            </div>
+          </button>
+        </div>
 
         <div className="hidden md:flex flex-1 items-center justify-center gap-3 rounded-3xl px-6 py-2">
           {navLinks.map((link) => renderNavButton(link))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end md:justify-end md:gap-4">
           <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 dark:bg-white/5">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
               <HeartIcon filled={favoritesCount > 0} />
             </span>
-            <span className="text-sm font-semibold text-slate-400 dark:text-slate-100">
+            <span className="text-sm font-semibold text-slate-400 dark:text-slate-100" aria-live="polite">
               {favoritesCount}
             </span>
           </div>
 
-          {/* Theme toggle with single sliding label */}
           <button
+            type="button"
             onClick={handleThemeToggle}
-            className="relative inline-flex items-center w-20 h-10 rounded-full border border-white/10 bg-white/5 dark:bg-white/5 px-2 shadow-sm focus:outline-none"
-            aria-label={`Switch to ${
-              theme === "light" ? "dark" : "light"
-            } mode`}
+            aria-pressed={theme === "dark"}
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            className="relative inline-flex h-10 w-20 items-center justify-between rounded-full border border-white/10 bg-white/10 px-2 text-sm shadow-sm backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
           >
-            {theme === "dark" ? (
-              <span className="absolute left-3 text-xs font-semibold transition-all duration-300 select-none transform -translate-x-0 opacity-100">
-                {/* Dark */}
-              </span>
-            ) : null}
-
-            {theme === "light" ? (
-              <span className="absolute right-3 text-xs font-semibold transition-all duration-300 select-none transform translate-x-0 opacity-100">
-                {/* Light */}
-              </span>
-            ) : null}
-
+            <span className={`text-lg transition-colors ${theme === "light" ? "text-amber-400" : "text-slate-500"}`}>☀</span>
             <span
-              className={`relative inline-flex items-center justify-center h-8 w-8 rounded-full bg-amber-500 text-white text-sm font-semibold transition-transform duration-300 transform ${
-                theme === "dark" ? "translate-x-0" : "translate-x-8"
+              aria-hidden="true"
+              className={`absolute inset-y-1 left-1 grid w-8 place-items-center rounded-full bg-amber-500 text-white text-base font-semibold transition-transform duration-300 ${
+                theme === "dark" ? "translate-x-8" : ""
               }`}
             >
-              {theme === "light" ? "☀" : "🌙"}
+              {theme === "dark" ? "🌙" : "☀"}
             </span>
+            <span className={`text-lg transition-colors ${theme === "dark" ? "text-amber-200" : "text-slate-500"}`}>🌙</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-2xl border border-white/10 bg-white/5 text-slate-700 dark:text-slate-200"
+            className="md:hidden flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/40 bg-black/60 px-4 py-2 text-white shadow-lg backdrop-blur dark:border-white/40 dark:bg-white/10 dark:text-white sm:flex-initial sm:justify-start"
             aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav"
           >
-            {mobileMenuOpen ? "✕" : "☰"}
+            <span className="sr-only">{mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}</span>
+            <MenuIcon open={mobileMenuOpen} />
+            <span className="text-xs font-semibold uppercase tracking-[0.4em]">Menu</span>
           </button>
         </div>
 
         {mobileMenuOpen && (
-          <div className="w-full md:hidden bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-2xl mt-2 py-4 space-y-2 border border-white/5">
+          <div
+            id="mobile-nav"
+            className="w-full md:hidden bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-2xl py-4 space-y-2 border border-white/5"
+          >
             {navLinks.map((link) => renderNavButton(link, true))}
           </div>
         )}

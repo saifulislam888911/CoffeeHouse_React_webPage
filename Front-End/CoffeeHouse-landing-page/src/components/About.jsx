@@ -1,4 +1,4 @@
-import aboutImage from "../assets/Coffee House Image/Bg and Section/bg1.jpg";
+import aboutImage from "../assets/images/sections/about.jpg";
 
 const milestones = [
   { label: "Years roasting", value: "15+" },

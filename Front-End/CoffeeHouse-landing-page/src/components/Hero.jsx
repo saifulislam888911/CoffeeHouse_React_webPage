@@ -1,4 +1,4 @@
-import heroBg from "../assets/Coffee House Image/bg and Section/bg2.jpg";
+import heroBg from "../assets/images/sections/hero.jpg";
 
 const highlights = [
   { label: "Roasts perfected", value: "15+" },
@@ -31,8 +31,9 @@ function Hero() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <button
+                type="button"
                 onClick={() => {
-                  const menuSection = document.getElementById("menu");
+                  const menuSection = typeof document !== "undefined" ? document.getElementById("menu") : null;
                   if (menuSection) {
                     menuSection.scrollIntoView({ behavior: "smooth" });
                   }
@@ -42,8 +43,9 @@ function Hero() {
                 Explore Menu
               </button>
               <button
+                type="button"
                 onClick={() => {
-                  const aboutSection = document.getElementById("about");
+                  const aboutSection = typeof document !== "undefined" ? document.getElementById("about") : null;
                   if (aboutSection) {
                     aboutSection.scrollIntoView({ behavior: "smooth" });
                   }

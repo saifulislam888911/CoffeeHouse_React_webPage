@@ -1,24 +1,6 @@
 import { useMemo, useState } from "react";
 import MenuCard from './MenuCard'
-import espressoImg from "../assets/Coffee House Image/Menu/items/Espresso.jpg";
-import cappuccinoImg from "../assets/Coffee House Image/Menu/items/Cappuccino.jpg";
-import latteImg from "../assets/Coffee House Image/Menu/items/Latte.jpg";
-import icedCoffeeImg from "../assets/Coffee House Image/Menu/items/Iced Coffee.jpg";
-import mochaImg from "../assets/Coffee House Image/Menu/items/Mocha.jpg";
-import americanoImg from "../assets/Coffee House Image/Menu/items/Americano.jpg";
-import coldBrewImg from "../assets/Coffee House Image/Menu/items/Cold Brew.jpg";
-import frappuccinoImg from "../assets/Coffee House Image/Menu/items/Frappuccino.jpg";
-
-const menuItems = [
-  { id: 1, name: "Espresso", price: "$3.50", category: "Hot", origin: "Italy", notes: "Bold, velvety, cocoa finish", image: espressoImg },
-  { id: 2, name: "Cappuccino", price: "$4.50", category: "Hot", origin: "Dhaka", notes: "Creamy microfoam, honey", image: cappuccinoImg },
-  { id: 3, name: "Latte", price: "$4.75", category: "Hot", origin: "Brazil", notes: "Silky milk, caramel swirl", image: latteImg },
-  { id: 4, name: "Iced Coffee", price: "$3.75", category: "Cold", origin: "Colombia", notes: "Chilled brew, citrus snap", image: icedCoffeeImg },
-  { id: 5, name: "Mocha", price: "$5.00", category: "Hot", origin: "Peru", notes: "Dark chocolate, spice", image: mochaImg },
-  { id: 6, name: "Americano", price: "$3.25", category: "Hot", origin: "Ethiopia", notes: "Bright crema, floral", image: americanoImg },
-  { id: 7, name: "Cold Brew", price: "$4.25", category: "Cold", origin: "Kenya", notes: "Slow steep, caramel", image: coldBrewImg },
-  { id: 8, name: "Frappuccino", price: "$5.50", category: "Blended", origin: "House Blend", notes: "Frappe, whipped cloud", image: frappuccinoImg }
-]
+import menuItems from "../data/menuItems";
 
 function MenuSection() {
   const [activeCategory, setActiveCategory] = useState('All')
@@ -54,8 +36,10 @@ function MenuSection() {
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {categories.map((category) => (
             <button
+              type="button"
               key={category}
               onClick={() => setActiveCategory(category)}
+              aria-pressed={activeCategory === category}
               className={`px-5 py-2 rounded-full border transition-all duration-200 ${
                 activeCategory === category
                   ? 'bg-amber-500 text-white border-transparent shadow-lg shadow-amber-200/40'

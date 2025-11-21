@@ -1,6 +1,3 @@
-// Contact Component
-// Displays contact information, location map, and hours
-
 function Contact() {
   return (
     <section
@@ -93,7 +90,7 @@ function Contact() {
               width="100%"
               height="100%"
               style={{ minHeight: "420px", border: 0 }}
-              allowFullScreen=""
+              allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               title="Coffee House Khilgaon Location"
